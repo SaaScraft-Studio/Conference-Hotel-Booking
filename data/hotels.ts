@@ -1,0 +1,36 @@
+export const hotels = [
+  {
+    id: "hyatt",
+    name: "Hyatt Regency Pune & Residences",
+    description: "Experience luxury and comfort in the heart of Pune",
+    location: "Weikfield IT City, Nagar Road",
+    stars: 5,
+    distanceFromVenue: "2",
+    distanceFromAirport: "4",
+    image: "https://images.pexels.com/photos/258154/pexels-photo-258154.jpeg",
+    mapEmbed: "https://www.google.com/maps/embed?pb=!1m18!...",
+  },
+  {
+    id: "marriott",
+    name: "JW Marriott Pune",
+    description: "Premium experience with world-class amenities",
+    location: "Senapati Bapat Road, Pune",
+    stars: 3,
+    distanceFromVenue: "5",
+    distanceFromAirport: "10",
+    image: "https://images.pexels.com/photos/271624/pexels-photo-271624.jpeg",
+    mapEmbed: "https://www.google.com/maps/embed?pb=!1m18!...",
+  },
+  {
+    id: "trident",
+    name: "Trident, Mumbai",
+    description: "Luxurious stay with stunning sea views and top-notch service",
+    location: "Nariman Point, Mumbai",
+    stars: 5,
+    distanceFromVenue: "8",
+    distanceFromAirport: "15",
+    image: "https://images.pexels.com/photos/261102/pexels-photo-261102.jpeg",
+    mapEmbed:
+      "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3769.123456!2d72.820123!3d18.922345!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3be7c123456789ab%3A0x123456789abcdef!2sTrident%20Mumbai!5e0!3m2!1sen!2sin!4v1695921234567",
+  },
+];
