@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import HotelListing from "./components/HotelListing";
 import Header from "./components/Header";
+import Footer from "./components/Footer";
 
 export default function Home() {
   return (
@@ -148,22 +149,24 @@ export default function Home() {
       </div> */}
 
       {/* CTA Section */}
-      <div className="bg-gradient-to-r from-blue-600 to-purple-700 py-20">
-        <div className="container mx-auto px-4 text-center">
-          {/* <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
+      {/* <div className="bg-gradient-to-r from-blue-600 to-purple-700 py-20"> */}
+      {/* <div className="container mx-auto px-4 text-center"> */}
+      {/* <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
             Ready for Your Perfect Stay?
           </h2> */}
-          <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
+      {/* <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
             For any queries please email to – info@synergymeetings.in
-          </p>
-          {/* <Link href="/booking">
+          </p> */}
+      {/* <Link href="/booking">
             <Button className="h-16 px-12 text-xl bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 transform hover:scale-105 transition-all duration-300 shadow-2xl">
               <Calendar className="mr-3 h-6 w-6" />
               Book Your Stay Today
             </Button>
           </Link> */}
-        </div>
-      </div>
+      {/* </div> */}
+      {/* </div> */}
+
+      <Footer />
     </div>
   );
 }

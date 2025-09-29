@@ -123,7 +123,7 @@ export default function HotelListing() {
                     {/* Distances */}
                     <div className="flex flex-col space-y-4 justify-between text-gray-700 text-sm mb-4">
                       <div className="flex items-center gap-2">
-                        <Bus size={20} />
+                        <Bus size={20} className="shrink-0"/>
                         <span>
                           Pune Bus Stand is {hotel.distanceFromBusStand} km away
                           from the property
@@ -131,7 +131,7 @@ export default function HotelListing() {
                       </div>
 
                       <div className="flex items-center gap-2">
-                        <TrainFront size={20} />
+                        <TrainFront size={20} className="shrink-0"/>
                         <span>
                           Pune Railway Station is {hotel.distanceFromRailwayStation} km away from Hyatt
                           Regency Pune
@@ -139,14 +139,14 @@ export default function HotelListing() {
                       </div>
 
                       <div className="flex items-center gap-2">
-                        <Plane size={20} />
+                        <Plane size={20} className="shrink-0"/>
                         <span>
                           Pune International Airport is {hotel.distanceFromAirport} km away from the property
                         </span>
                       </div>
 
                       <div className="flex items-center gap-2">
-                        <Landmark size={20} />
+                        <Landmark size={20} className="shrink-0"/>
                         <span>
                           {hotel.distanceFromVenue} km away from the venue
                         </span>
