@@ -12,12 +12,13 @@ import {
   Waves,
 } from "lucide-react";
 import HotelListing from "./components/HotelListing";
+import Header from "./components/Header";
 
 export default function Home() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
       {/* Hero Section */}
-      <div className="relative h-96 bg-gradient-to-r from-blue-600 to-purple-700 overflow-hidden">
+      {/* <div className="relative h-96 bg-gradient-to-r from-blue-600 to-purple-700 overflow-hidden">
         <div className="absolute inset-0 bg-black/30"></div>
         <div className="absolute inset-0 bg-[url('https://images.pexels.com/photos/258154/pexels-photo-258154.jpeg')] bg-cover bg-center mix-blend-overlay opacity-40"></div>
 
@@ -37,7 +38,7 @@ export default function Home() {
               Book your stay with us for an unforgettable experience.
             </p>
 
-            {/* <div className="flex flex-col sm:flex-row gap-4 mb-8">
+            <div className="flex flex-col sm:flex-row gap-4 mb-8">
               <Link href="/booking">
                 <Button className="h-14 px-8 text-lg bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 transform hover:scale-105 transition-all duration-300 shadow-lg">
                   <Calendar className="mr-2 h-5 w-5" />
@@ -51,9 +52,9 @@ export default function Home() {
                 <MapPin className="mr-2 h-5 w-5" />
                 View Location
               </Button>
-            </div> */}
+            </div>
 
-            {/* <div className="flex items-center space-x-6">
+            <div className="flex items-center space-x-6">
               <div className="flex items-center space-x-1">
                 {[1, 2, 3, 4, 5].map((star) => (
                   <Star key={star} className="h-5 w-5 fill-yellow-400 text-yellow-400" />
@@ -64,10 +65,12 @@ export default function Home() {
                 <MapPin className="h-5 w-5" />
                 <span>Weikfield IT City</span>
               </div>
-            </div> */}
+            </div>
           </div>
         </div>
-      </div>
+      </div> */}
+
+      <Header />
 
       <HotelListing />
 
@@ -147,12 +150,11 @@ export default function Home() {
       {/* CTA Section */}
       <div className="bg-gradient-to-r from-blue-600 to-purple-700 py-20">
         <div className="container mx-auto px-4 text-center">
-          <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
+          {/* <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
             Ready for Your Perfect Stay?
-          </h2>
+          </h2> */}
           <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
-            Book now and experience the finest hospitality in Pune. Special
-            rates available for extended stays.
+            For any queries please email to – info@synergymeetings.in
           </p>
           {/* <Link href="/booking">
             <Button className="h-16 px-12 text-xl bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 transform hover:scale-105 transition-all duration-300 shadow-2xl">

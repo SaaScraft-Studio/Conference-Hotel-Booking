@@ -1,8 +1,10 @@
 export interface BookingFormData {
+  title: string;
   firstName: string;
   middleName?: string;
   lastName: string;
   email: string;
+  gender: string;
   mobile: string;
   address: string;
   state: string;

@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/select";
 import { hotels } from "@/data/hotels";
 import { useRouter } from "next/navigation";
-import { MapPin, Plane, Landmark } from "lucide-react";
+import { MapPin, Plane, Landmark, Bus, TrainFront } from "lucide-react";
 
 export default function HotelListing() {
   const router = useRouter();
@@ -37,7 +37,7 @@ export default function HotelListing() {
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
         {/* Left Sidebar Filter */}
-        <aside className="bg-white rounded-xl shadow-md p-6 space-y-6 h-fit">
+        <aside className="bg-white rounded-xl shadow-md p-6 space-y-10 h-fit">
           <h3 className="text-lg font-semibold">Filters</h3>
 
           {/* Star Rating Filter */}
@@ -114,23 +114,41 @@ export default function HotelListing() {
 
                     {/* Location */}
                     <div className="flex items-center gap-1 mt-4 mb-4 text-gray-600">
-                      <MapPin size={16} />
-                      <p className="text-sm ">{hotel.location}</p>
+                      <div className="flex items-center gap-2">
+                        <MapPin size={20} className="shrink-0"/>
+                        <p className="text-sm">{hotel.location}</p>
+                      </div>
                     </div>
 
                     {/* Distances */}
-                    <div className="flex justify-between text-gray-700 text-sm mb-4">
+                    <div className="flex flex-col space-y-4 justify-between text-gray-700 text-sm mb-4">
                       <div className="flex items-center gap-2">
-                        <Landmark size={16} />
+                        <Bus size={20} />
                         <span>
-                          {hotel.distanceFromVenue} Kms from the venue
+                          Pune Bus Stand is {hotel.distanceFromBusStand} km away
+                          from the property
                         </span>
                       </div>
 
                       <div className="flex items-center gap-2">
-                        <Plane size={16} />
+                        <TrainFront size={20} />
                         <span>
-                          {hotel.distanceFromAirport} Kms from the airport
+                          Pune Railway Station is {hotel.distanceFromRailwayStation} km away from Hyatt
+                          Regency Pune
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <Plane size={20} />
+                        <span>
+                          Pune International Airport is {hotel.distanceFromAirport} km away from the property
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <Landmark size={20} />
+                        <span>
+                          {hotel.distanceFromVenue} km away from the venue
                         </span>
                       </div>
                     </div>

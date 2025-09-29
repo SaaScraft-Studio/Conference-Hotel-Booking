@@ -1,14 +1,14 @@
 export const roomTypes = {
   single: {
-    name: 'Single Occupancy',
-    price: 100,
-    description: 'Comfortable room for one person'
+    name: "Single Occupancy",
+    price: 9500,
+    description: "Comfortable room for one person",
   },
   double: {
-    name: 'Double Occupancy',
-    price: 150,
-    description: 'Spacious room for two people'
-  }
+    name: "Double Occupancy",
+    price: 10000,
+    description: "Spacious room for two people",
+  },
 };
 
 export const calculateBookingAmount = (

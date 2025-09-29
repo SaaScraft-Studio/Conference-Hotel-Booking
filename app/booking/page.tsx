@@ -32,16 +32,26 @@ import { BookingFormData } from "@/types/booking";
 import { useSearchParams } from "next/navigation";
 import { hotels } from "@/data/hotels"; // make sure this is imported
 
-
 const bookingSchema = z.object({
-  firstName: z.string().min(1, "First name is required"),
+  title: z
+    .string()
+    .min(1, "Title is required")
+    .regex(/^[A-Za-z\s]+$/, "Only alphabets allowed"),
+  firstName: z
+    .string()
+    .min(1, "First name is required")
+    .regex(/^[A-Za-z\s]+$/, "Only alphabets allowed"),
   middleName: z.string().optional(),
-  lastName: z.string().min(1, "Last name is required"),
+  lastName: z
+    .string()
+    .min(1, "Last name is required")
+    .regex(/^[A-Za-z\s]+$/, "Only alphabets allowed"),
+  gender: z.string().min(1, "Please select a gender"),
   email: z.string().email("Invalid email address"),
   mobile: z.string().min(10, "Mobile number must be at least 10 digits"),
   address: z.string().min(1, "Address is required"),
   state: z.string().min(1, "Please select a state"),
-  companyName: z.string().optional(),
+  companyName: z.string().min(1, "Company name is required"),
   gst: z.string().optional(),
   checkinDate: z.string().min(1, "Check-in date is required"),
   checkoutDate: z.string().min(1, "Check-out date is required"),
@@ -60,7 +70,6 @@ export default function BookingPage() {
   const searchParams = useSearchParams();
   const hotelId = searchParams.get("hotel"); // from query ?hotel=hotelId
   const hotel = hotels.find((h) => h.id === hotelId);
-
 
   const {
     register,
@@ -120,10 +129,47 @@ export default function BookingPage() {
     }
   };
 
-  const isCheckoutDisabled = (date: Date) => {
-    if (!checkinDate) return false;
-    return date <= checkinDate;
+  // Check-in available range
+  const checkinAvailability = [
+    { start: new Date("2025-12-03"), end: new Date("2025-12-04") },
+  ];
+
+  // Checkout availability ranges relative to check-in
+  const checkoutAvailability = [
+    { start: new Date("2025-12-04"), end: new Date("2025-12-06") }, // for earliest check-in
+  ];
+
+  const generateDates = (start: Date, end: Date): Date[] => {
+    const dates = [];
+    let current = new Date(start);
+    while (current <= end) {
+      dates.push(new Date(current));
+      current.setDate(current.getDate() + 1);
+    }
+    return dates;
   };
+
+  const availableCheckinDates = checkinAvailability.flatMap((range) =>
+    generateDates(range.start, range.end)
+  );
+
+  const getAvailableCheckoutDates = (checkinDate?: Date): Date[] => {
+    if (!checkinDate) return [];
+    // Find range that starts after selected check-in
+    return checkoutAvailability
+      .filter(
+        (range) =>
+          range.start > checkinDate ||
+          range.start.getTime() === checkinDate.getTime()
+      )
+      .flatMap((range) => generateDates(range.start, range.end));
+  };
+
+
+  // const isCheckoutDisabled = (date: Date) => {
+  //   if (!checkinDate) return false;
+  //   return date <= checkinDate;
+  // };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
@@ -147,7 +193,7 @@ export default function BookingPage() {
                 <MapPin className="h-5 w-5" />
                 <span className="text-sm">{hotel?.location}</span>
               </div>
-              <div className="flex items-center space-x-1">
+              <div className="flex items-center space-x-2">
                 {Array.from({ length: hotel?.stars || 0 }).map((_, i) => (
                   <Star
                     key={i}
@@ -162,7 +208,7 @@ export default function BookingPage() {
       </div>
 
       {/* Hotel Images and Map */}
-      <div className="container mx-auto px-4 -mt-20 relative z-20">
+      <div className="container mx-auto px-4 -mt-10 relative z-20">
         <div className="grid md:grid-cols-2 gap-6 mb-8">
           {/* Left: Hotel Image */}
           <Card className="overflow-hidden shadow-2xl">
@@ -199,13 +245,29 @@ export default function BookingPage() {
           <CardContent className="p-8">
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
               {/* Personal Information */}
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="space-y-2">
+                  <Label htmlFor="title">Title *</Label>
+                  <Input
+                    id="title"
+                    {...register("title")}
+                    className={errors.title ? "border-red-500" : ""}
+                    placeholder="Eg. Mr/Ms/Mrs"
+                  />
+                  {errors.title && (
+                    <p className="text-red-500 text-sm">
+                      {errors.title.message}
+                    </p>
+                  )}
+                </div>
+
                 <div className="space-y-2">
                   <Label htmlFor="firstName">First Name *</Label>
                   <Input
                     id="firstName"
                     {...register("firstName")}
                     className={errors.firstName ? "border-red-500" : ""}
+                    placeholder="Enter first name"
                   />
                   {errors.firstName && (
                     <p className="text-red-500 text-sm">
@@ -216,7 +278,11 @@ export default function BookingPage() {
 
                 <div className="space-y-2">
                   <Label htmlFor="middleName">Middle Name</Label>
-                  <Input id="middleName" {...register("middleName")} />
+                  <Input
+                    id="middleName"
+                    {...register("middleName")}
+                    placeholder="Enter middle name"
+                  />
                 </div>
 
                 <div className="space-y-2">
@@ -225,10 +291,32 @@ export default function BookingPage() {
                     id="lastName"
                     {...register("lastName")}
                     className={errors.lastName ? "border-red-500" : ""}
+                    placeholder="Enter last name"
                   />
                   {errors.lastName && (
                     <p className="text-red-500 text-sm">
                       {errors.lastName.message}
+                    </p>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="gender">Gender *</Label>
+                  <Select onValueChange={(value) => setValue("gender", value)}>
+                    <SelectTrigger
+                      className={errors.gender ? "border-red-500" : ""}
+                    >
+                      <SelectValue placeholder="Select gender" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="male">Male</SelectItem>
+                      <SelectItem value="female">Female</SelectItem>
+                      <SelectItem value="other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  {errors.gender && (
+                    <p className="text-red-500 text-sm">
+                      {errors.gender.message}
                     </p>
                   )}
                 </div>
@@ -240,6 +328,7 @@ export default function BookingPage() {
                     type="email"
                     {...register("email")}
                     className={errors.email ? "border-red-500" : ""}
+                    placeholder="Enter email"
                   />
                   {errors.email && (
                     <p className="text-red-500 text-sm">
@@ -252,9 +341,15 @@ export default function BookingPage() {
                   <Label htmlFor="mobile">Mobile *</Label>
                   <Input
                     id="mobile"
+                    type="tel"
+                    maxLength={10}
+                    inputMode="numeric"
+                    pattern="[0-9]*"
                     {...register("mobile")}
                     className={errors.mobile ? "border-red-500" : ""}
+                    placeholder="Enter mobile number"
                   />
+
                   {errors.mobile && (
                     <p className="text-red-500 text-sm">
                       {errors.mobile.message}
@@ -288,8 +383,18 @@ export default function BookingPage() {
 
               <div className="grid md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label htmlFor="companyName">Company Name</Label>
-                  <Input id="companyName" {...register("companyName")} />
+                  <Label htmlFor="companyName">Company Name *</Label>
+                  <Input
+                    id="companyName"
+                    {...register("companyName")}
+                    className={errors.companyName ? "border-red-500" : ""}
+                    placeholder="Enter company name"
+                  />
+                  {errors.companyName && (
+                    <p className="text-red-500 text-sm">
+                      {errors.companyName.message}
+                    </p>
+                  )}
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="gst">GST Number (Optional)</Label>
@@ -307,6 +412,7 @@ export default function BookingPage() {
                   id="address"
                   {...register("address")}
                   className={errors.address ? "border-red-500" : ""}
+                  placeholder="Enter address"
                 />
                 {errors.address && (
                   <p className="text-red-500 text-sm">
@@ -332,10 +438,17 @@ export default function BookingPage() {
                           "checkinDate",
                           date?.toISOString().split("T")[0] || ""
                         );
+                        setCheckoutDate(undefined);
+                        setValue("checkoutDate", "");
                       }}
                       placeholder="Select check-in date"
-                      disabled={(date) => date < new Date()}
+                      disabled={(date) =>
+                        !availableCheckinDates.some(
+                          (d) => d.toDateString() === date.toDateString()
+                        )
+                      }
                     />
+
                     {errors.checkinDate && (
                       <p className="text-red-500 text-sm">
                         {errors.checkinDate.message}
@@ -355,8 +468,15 @@ export default function BookingPage() {
                         );
                       }}
                       placeholder="Select check-out date"
-                      disabled={isCheckoutDisabled}
+                      disabled={(date) => {
+                        const allowedDates =
+                          getAvailableCheckoutDates(checkinDate);
+                        return !allowedDates.some(
+                          (d) => d.toDateString() === date.toDateString()
+                        );
+                      }}
                     />
+
                     {errors.checkoutDate && (
                       <p className="text-red-500 text-sm">
                         {errors.checkoutDate.message}
@@ -387,7 +507,7 @@ export default function BookingPage() {
                             <div>
                               <div className="font-medium">{room.name}</div>
                               <div className="text-sm text-gray-500">
-                                {room.description}
+                                {/* {room.description} */}
                               </div>
                             </div>
                             <div className="text-right">
@@ -427,10 +547,35 @@ export default function BookingPage() {
                     <li>• Check-in time: 2:00 PM</li>
                     <li>• Check-out time: 12:00 PM</li>
                     <li>
-                      • Cancellation allowed up to 24 hours before check-in
+                      • No Cancelation nor refund once the booking and payment
+                      is done
                     </li>
                     <li>• Valid ID proof required at check-in</li>
-                    <li>• Pet policy: Pets allowed with prior approval</li>
+                    <li>• No meals included</li>
+                    <li>• Primary Guest should be atleast 18 years of age</li>
+                    <li>
+                      • Passport, Aadhaar, Driving License and Govt. ID are
+                      accepted as ID proof(s)
+                    </li>
+                    <li>• Smoking within the premises is allowed</li>
+                    <li>• Single Occupancy: Only One-person can stay</li>
+                    <li>• Double Occupancy: Only two people can stay</li>
+                    <li>
+                      • Early check in and late checkout is subject to
+                      availability and additional charges will be applicable
+                    </li>
+                    <li>
+                      • Any other personal expenses such as telephone calls,
+                      food & beverage bills, room service and use of mini bar
+                      should be paid by the guest directly to the hotel at the
+                      time of check out
+                    </li>
+                    <li>
+                      • Hotel bookings are non-refundable. After confirmation,
+                      100% charges apply for cancellations. Name changes allowed
+                      up to 30 days before check-in
+                    </li>
+                    <li>• GST will be charged additional on total billing</li>
                   </ul>
 
                   <div className="flex items-center space-x-2">
