@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -31,6 +31,7 @@ import { roomTypes, calculateBookingAmount } from "@/lib/room-pricing";
 import { BookingFormData } from "@/types/booking";
 import { useSearchParams } from "next/navigation";
 import { hotels } from "@/data/hotels"; // make sure this is imported
+import { Hotel } from "@/types/hotel";
 
 const bookingSchema = z.object({
   title: z
@@ -66,10 +67,22 @@ export default function BookingPage() {
   const [checkoutDate, setCheckoutDate] = useState<Date>();
   const [roomType, setRoomType] = useState<"single" | "double">("single");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [hotel, setHotel] = useState<Hotel | null>(null);
+  console.log("Selected hotel:", hotel);
 
   const searchParams = useSearchParams();
-  const hotelId = searchParams.get("hotel"); // from query ?hotel=hotelId
-  const hotel = hotels.find((h) => h.id === hotelId);
+  const hotelId = searchParams.get("hotel");
+  console.log("Hotel ID from URL:", hotelId);
+
+  useEffect(() => {
+    if (!hotelId) return;
+
+    // Fetch hotel dynamically from your API or local data
+    fetch(`${process.env.NEXT_PUBLIC_HOTEL_API}/hotel/${hotelId}`)
+      .then((res) => res.json())
+      .then((data: Hotel) => setHotel(data))
+      .catch((err) => console.error("Failed to fetch hotel:", err));
+  }, [hotelId]);
 
   const {
     register,
@@ -130,14 +143,14 @@ export default function BookingPage() {
   };
 
   // Check-in available range
-  const checkinAvailability = [
-    { start: new Date("2025-12-03"), end: new Date("2025-12-04") },
-  ];
+  // const checkinAvailability = [
+  //   { start: new Date("2025-12-03"), end: new Date("2025-12-04") },
+  // ];
 
   // Checkout availability ranges relative to check-in
-  const checkoutAvailability = [
-    { start: new Date("2025-12-04"), end: new Date("2025-12-06") }, // for earliest check-in
-  ];
+  // const checkoutAvailability = [
+  //   { start: new Date("2025-12-04"), end: new Date("2025-12-06") }, // for earliest check-in
+  // ];
 
   const generateDates = (start: Date, end: Date): Date[] => {
     const dates = [];
@@ -149,20 +162,21 @@ export default function BookingPage() {
     return dates;
   };
 
-  const availableCheckinDates = checkinAvailability.flatMap((range) =>
-    generateDates(range.start, range.end)
-  );
-
-  const getAvailableCheckoutDates = (checkinDate?: Date): Date[] => {
-    if (!checkinDate) return [];
-    // Find range that starts after selected check-in
-    return checkoutAvailability
-      .filter(
-        (range) =>
-          range.start > checkinDate ||
-          range.start.getTime() === checkinDate.getTime()
+  const availableCheckinDates = hotel
+    ? generateDates(
+        new Date(hotel.checkin_start_date),
+        new Date(hotel.checkin_end_date)
       )
-      .flatMap((range) => generateDates(range.start, range.end));
+    : [];
+
+  const getAvailableCheckoutDates = (checkin?: Date) => {
+    if (!hotel || !checkin) return [];
+    const start =
+      checkin > new Date(hotel.checkout_start_date)
+        ? checkin
+        : new Date(hotel.checkout_start_date);
+    const end = new Date(hotel.checkout_end_date);
+    return generateDates(start, end);
   };
 
 
@@ -181,26 +195,28 @@ export default function BookingPage() {
         <div className="relative z-10 container mx-auto px-4 h-full flex items-center">
           <div className="text-white max-w-2xl">
             <h1 className="text-5xl font-bold mb-4">
-              {hotel?.name || "Hotel Name"}
+              {hotel?.hotel_name || "Hotel Name"}
             </h1>
             <p className="text-xl opacity-90 mb-6">
               Experience luxury and comfort in{" "}
-              {hotel?.location || "the selected location"}
+              {hotel?.address || "the selected location"}
             </p>
 
             <div className="flex items-center space-x-6">
               <div className="flex items-center space-x-2">
                 <MapPin className="h-5 w-5" />
-                <span className="text-sm">{hotel?.location}</span>
+                <span className="text-sm">{hotel?.address}</span>
               </div>
               <div className="flex items-center space-x-2">
-                {Array.from({ length: hotel?.stars || 0 }).map((_, i) => (
+                {Array.from({ length: hotel?.star_rating || 0 }).map((_, i) => (
                   <Star
                     key={i}
                     className="h-4 w-4 fill-yellow-400 text-yellow-400"
                   />
                 ))}
-                <span className="text-sm ml-1">{hotel?.stars}-Star Luxury</span>
+                <span className="text-sm ml-1">
+                  {hotel?.star_rating}-Star Luxury
+                </span>
               </div>
             </div>
           </div>
@@ -214,7 +230,7 @@ export default function BookingPage() {
           <Card className="overflow-hidden shadow-2xl">
             <div
               className="h-64 bg-cover bg-center"
-              style={{ backgroundImage: `url(${hotel?.image})` }}
+              style={{ backgroundImage: `url(${hotel?.main_image_url})` }}
             ></div>
           </Card>
 
@@ -223,7 +239,7 @@ export default function BookingPage() {
             <div className="h-64 relative">
               <iframe
                 src={`https://www.google.com/maps?q=${encodeURIComponent(
-                  hotel?.location || ""
+                  hotel?.map_link || ""
                 )}&output=embed`}
                 className="w-full h-full"
                 loading="lazy"
@@ -496,18 +512,28 @@ export default function BookingPage() {
                     }}
                     className="grid md:grid-cols-2 gap-4"
                   >
-                    {Object.entries(roomTypes).map(([key, room]) => (
-                      <div key={key} className="flex items-center space-x-2">
-                        <RadioGroupItem value={key} id={key} />
+                    {hotel?.room_types?.map((room) => (
+                      <div
+                        key={room.name}
+                        className="flex items-center space-x-2"
+                      >
+                        <RadioGroupItem
+                          value={
+                            room.name.toLowerCase().includes("single")
+                              ? "single"
+                              : "double"
+                          }
+                          id={room.name}
+                        />
                         <Label
-                          htmlFor={key}
+                          htmlFor={room.name}
                           className="flex-1 p-4 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
                         >
                           <div className="flex justify-between items-center">
                             <div>
                               <div className="font-medium">{room.name}</div>
                               <div className="text-sm text-gray-500">
-                                {/* {room.description} */}
+                                {room.description}
                               </div>
                             </div>
                             <div className="text-right">
@@ -544,38 +570,9 @@ export default function BookingPage() {
                 <div className="bg-gray-50 rounded-lg p-6">
                   <h4 className="font-semibold mb-4">Booking Policy</h4>
                   <ul className="space-y-2 text-sm text-gray-600 mb-4">
-                    <li>• Check-in time: 2:00 PM</li>
-                    <li>• Check-out time: 12:00 PM</li>
-                    <li>
-                      • No Cancelation nor refund once the booking and payment
-                      is done
-                    </li>
-                    <li>• Valid ID proof required at check-in</li>
-                    <li>• No meals included</li>
-                    <li>• Primary Guest should be atleast 18 years of age</li>
-                    <li>
-                      • Passport, Aadhaar, Driving License and Govt. ID are
-                      accepted as ID proof(s)
-                    </li>
-                    <li>• Smoking within the premises is allowed</li>
-                    <li>• Single Occupancy: Only One-person can stay</li>
-                    <li>• Double Occupancy: Only two people can stay</li>
-                    <li>
-                      • Early check in and late checkout is subject to
-                      availability and additional charges will be applicable
-                    </li>
-                    <li>
-                      • Any other personal expenses such as telephone calls,
-                      food & beverage bills, room service and use of mini bar
-                      should be paid by the guest directly to the hotel at the
-                      time of check out
-                    </li>
-                    <li>
-                      • Hotel bookings are non-refundable. After confirmation,
-                      100% charges apply for cancellations. Name changes allowed
-                      up to 30 days before check-in
-                    </li>
-                    <li>• GST will be charged additional on total billing</li>
+                    {hotel?.policies?.map((policy, idx) => (
+                      <li key={idx}>• {policy}</li>
+                    ))}
                   </ul>
 
                   <div className="flex items-center space-x-2">

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,24 +10,64 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { hotels } from "@/data/hotels";
+// import { hotels } from "@/data/hotels";
 import { useRouter } from "next/navigation";
 import { MapPin, Plane, Landmark, Bus, TrainFront } from "lucide-react";
+import { Hotel } from "@/types/hotel";
 
 export default function HotelListing() {
   const router = useRouter();
+  const [hotels, setHotels] = useState<Hotel[]>([]);
+  const [loading, setLoading] = useState(true);
   const [starFilter, setStarFilter] = useState("all");
   const [distanceFilter, setDistanceFilter] = useState("all");
 
+  useEffect(() => {
+    async function fetchHotels() {
+      try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_HOTEL_API}/hotel`);
+        const data = await res.json();
+        console.log("Fetched hotels:", data);
+        setHotels(data);
+      } catch (error) {
+        console.error("Error fetching hotels:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchHotels();
+  }, []);
+
   // Filter hotels dynamically
   const filteredHotels = hotels.filter((hotel) => {
-    let starMatch = starFilter === "all" || hotel.stars === Number(starFilter);
+    let starMatch =
+      starFilter === "all" || hotel.star_rating === Number(starFilter);
+
+    // venue distance = last element in distances[] (e.g., "2 Kms away from the venue")
+    const venueDistance = hotel.distances.find((d) =>
+      d.toLowerCase().includes("venue")
+    );
+    const distanceValue = venueDistance
+      ? parseFloat(venueDistance.split(" ")[0])
+      : null;
+
     let distanceMatch =
       distanceFilter === "all" ||
-      (distanceFilter === "near" && parseInt(hotel.distanceFromVenue) <= 3) ||
-      (distanceFilter === "far" && parseInt(hotel.distanceFromVenue) > 3);
+      (distanceFilter === "near" &&
+        distanceValue !== null &&
+        distanceValue <= 3) ||
+      (distanceFilter === "far" && distanceValue !== null && distanceValue > 3);
+
     return starMatch && distanceMatch;
   });
+
+  if (loading) {
+    return (
+      <p className="text-center py-20 text-gray-600 text-lg">
+        Loading hotels...
+      </p>
+    );
+  }
 
   return (
     <section className="container mx-auto px-4 py-16">
@@ -90,18 +130,18 @@ export default function HotelListing() {
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredHotels.map((hotel) => (
                 <Card
-                  key={hotel.id}
+                  key={hotel._id}
                   className="rounded-2xl overflow-hidden shadow-lg border border-gray-200 flex flex-col"
                 >
                   {/* Image + Star Badge */}
                   <div className="relative">
                     <img
-                      src={hotel.image}
-                      alt={hotel.name}
+                      src={hotel.main_image_url}
+                      alt={hotel.hotel_name}
                       className="w-full h-56 object-cover"
                     />
                     <div className="absolute top-2 left-2 bg-yellow-500 text-white text-sm px-2 py-1 rounded-full font-semibold shadow-md">
-                      ⭐ {hotel.stars}
+                      ⭐ {hotel.star_rating}
                     </div>
                   </div>
 
@@ -109,48 +149,37 @@ export default function HotelListing() {
                   <CardContent className="p-5 flex flex-col flex-1">
                     {/* Title */}
                     <h3 className="text-blue-700 text-xl font-bold mb-1">
-                      {hotel.name}
+                      {hotel.hotel_name}
                     </h3>
 
                     {/* Location */}
                     <div className="flex items-center gap-1 mt-4 mb-4 text-gray-600">
                       <div className="flex items-center gap-2">
-                        <MapPin size={20} className="shrink-0"/>
-                        <p className="text-sm">{hotel.location}</p>
+                        <MapPin size={20} className="shrink-0" />
+                        <p className="text-sm">{hotel.address}</p>
                       </div>
                     </div>
 
                     {/* Distances */}
                     <div className="flex flex-col space-y-4 justify-between text-gray-700 text-sm mb-4">
-                      <div className="flex items-center gap-2">
-                        <Bus size={20} className="shrink-0"/>
-                        <span>
-                          Pune Bus Stand is {hotel.distanceFromBusStand} km away
-                          from the property
-                        </span>
-                      </div>
-
-                      <div className="flex items-center gap-2">
-                        <TrainFront size={20} className="shrink-0"/>
-                        <span>
-                          Pune Railway Station is {hotel.distanceFromRailwayStation} km away from Hyatt
-                          Regency Pune
-                        </span>
-                      </div>
-
-                      <div className="flex items-center gap-2">
-                        <Plane size={20} className="shrink-0"/>
-                        <span>
-                          Pune International Airport is {hotel.distanceFromAirport} km away from the property
-                        </span>
-                      </div>
-
-                      <div className="flex items-center gap-2">
-                        <Landmark size={20} className="shrink-0"/>
-                        <span>
-                          {hotel.distanceFromVenue} km away from the venue
-                        </span>
-                      </div>
+                      {hotel.distances.map((dist, index) => {
+                        let Icon;
+                        if (dist.toLowerCase().includes("railway")) {
+                          Icon = TrainFront;
+                        } else if (dist.toLowerCase().includes("airport")) {
+                          Icon = Plane;
+                        } else if (dist.toLowerCase().includes("venue")) {
+                          Icon = Landmark;
+                        } else {
+                          Icon = Bus;
+                        }
+                        return (
+                          <div key={index} className="flex items-center gap-2">
+                            <Icon size={16} className="shrink-0" />
+                            <span>{dist}</span>
+                          </div>
+                        );
+                      })}
                     </div>
 
                     {/* Book Button pushed to bottom */}
@@ -158,7 +187,7 @@ export default function HotelListing() {
                       <Button
                         className="w-full bg-gradient-to-r from-orange-500 to-pink-500 text-white font-semibold py-2 rounded-lg hover:scale-105 transition-transform"
                         onClick={() =>
-                          router.push(`/booking?hotel=${hotel.id}`)
+                          router.push(`/booking?hotel=${hotel._id}`)
                         }
                       >
                         Book Now
