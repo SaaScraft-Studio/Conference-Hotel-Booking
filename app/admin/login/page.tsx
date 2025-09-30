@@ -60,7 +60,7 @@ export default function AdminLoginPage() {
           <CardTitle className="text-2xl font-bold text-gray-800">
             Admin Portal
           </CardTitle>
-          <p className="text-gray-600">Hyatt Regency Management System</p>
+          <p className="text-gray-600">Event Hotel Booking Software</p>
         </CardHeader>
 
         <CardContent>
