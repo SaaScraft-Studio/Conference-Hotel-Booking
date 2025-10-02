@@ -17,7 +17,7 @@ export default function BookingErrorPage() {
       case "InternalError":
         return "An internal error occurred. Please try again later.";
       default:
-        return "An unexpected error occurred. Please try again or contact support.";
+        return "An unexpected error occurred. Please try again or contact support";
     }
   };
 
