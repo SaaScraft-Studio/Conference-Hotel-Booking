@@ -14,7 +14,7 @@ export default function BookingFailurePage() {
   const handleRetry = () => {
     if (bookingId) {
       // Retry payment for the same booking
-      router.push(`/retry-payment?bookingId=${bookingId}`);
+      router.push(`/retry?bookingId=${bookingId}`);
     } else {
       // Go back to booking page
       router.back();
