@@ -30,14 +30,13 @@ import { indianStates } from "@/lib/indian-states";
 import { roomTypes, calculateBookingAmount } from "@/lib/room-pricing";
 import { BookingFormData } from "@/types/booking";
 import { useSearchParams } from "next/navigation";
-import { hotels } from "@/data/hotels"; // make sure this is imported
+// import { hotels } from "@/data/hotels"; // make sure this is imported
 import { Hotel } from "@/types/hotel";
 
 const bookingSchema = z.object({
-  title: z
-    .string()
-    .min(1, "Title is required")
-    .regex(/^[A-Za-z\s]+$/, "Only alphabets allowed"),
+  title: z.enum(["Mr", "Ms", "Mrs", "Dr"], {
+    errorMap: () => ({ message: "Please select a title" }),
+  }),
   firstName: z
     .string()
     .min(1, "First name is required")
@@ -47,7 +46,9 @@ const bookingSchema = z.object({
     .string()
     .min(1, "Last name is required")
     .regex(/^[A-Za-z\s]+$/, "Only alphabets allowed"),
-  gender: z.string().min(1, "Please select a gender"),
+  gender: z.enum(["Male", "Female", "Other"], {
+    errorMap: () => ({ message: "Please select a gender" }),
+  }),
   email: z.string().email("Invalid email address"),
   mobile: z.string().min(10, "Mobile number must be at least 10 digits"),
   address: z.string().min(1, "Address is required"),
@@ -78,7 +79,7 @@ export default function BookingPage() {
     if (!hotelId) return;
 
     // Fetch hotel dynamically from your API or local data
-    fetch(`${process.env.NEXT_PUBLIC_HOTEL_API}/hotel/${hotelId}`)
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/hotel/${hotelId}`)
       .then((res) => res.json())
       .then((data: Hotel) => setHotel(data))
       .catch((err) => console.error("Failed to fetch hotel:", err));
@@ -100,57 +101,88 @@ export default function BookingPage() {
   const watchedValues = watch();
 
   const totalAmount = React.useMemo(() => {
-    if (checkinDate && checkoutDate && roomType) {
-      return calculateBookingAmount(
-        checkinDate.toISOString().split("T")[0],
-        checkoutDate.toISOString().split("T")[0],
-        roomType
-      );
-    }
-    return roomTypes[roomType].price;
-  }, [checkinDate, checkoutDate, roomType]);
+    if (!hotel) return 0;
 
+    const selectedRoom = hotel.room_types?.find((r) =>
+      roomType === "single"
+        ? r.name.toLowerCase().includes("single")
+        : r.name.toLowerCase().includes("double")
+    );
+    if (!selectedRoom) return 0;
+    if (checkinDate && checkoutDate) {
+      const nights = Math.ceil(
+        (checkoutDate.getTime() - checkinDate.getTime()) / (1000 * 60 * 60 * 24)
+      );
+      return nights * selectedRoom.price;
+    }
+    return selectedRoom.price;
+  }, [checkinDate, checkoutDate, roomType, hotel]);
+
+  // ADD THIS ONSUBMIT FUNCTION
   const onSubmit = async (data: BookingFormData) => {
+    if (!hotel) {
+      alert("Hotel information not loaded. Please try again.");
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
-      const response = await fetch("/api/payment/create", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          ...data,
-          checkinDate: checkinDate?.toISOString().split("T")[0],
-          checkoutDate: checkoutDate?.toISOString().split("T")[0],
-        }),
-      });
+      // Prepare booking data according to API requirements
+      const selectedRoom = hotel.room_types.find((r) =>
+        roomType === "single"
+          ? r.name.toLowerCase().includes("single")
+          : r.name.toLowerCase().includes("double")
+      );
+      if (!selectedRoom) {
+        throw new Error("Invalid room type selection");
+      }
+      const bookingData = {
+        hotel: hotelId,
+        title: data.title,
+        first_name: data.firstName,
+        middle_name: data.middleName || "",
+        last_name: data.lastName,
+        gender: data.gender.charAt(0).toUpperCase() + data.gender.slice(1), // Capitalize first letter
+        email: data.email,
+        mobile: data.mobile,
+        state: data.state,
+        company_name: data.companyName,
+        gst_number: data.gst || "",
+        address: data.address,
+        check_in_date: new Date(data.checkinDate).toISOString(),
+        check_out_date: new Date(data.checkoutDate).toISOString(),
+        room_type: selectedRoom.name,
+        total_amount: totalAmount,
+      };
+
+      // Call the payment initiation endpoint
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/payment/initiate`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(bookingData),
+        }
+      );
 
       const result = await response.json();
 
-      if (result.success) {
-        // Redirect to payment URL
-        window.location.href = result.paymentUrl;
+      if (response.ok) {
+        // Redirect to Instamojo payment page
+        window.location.href = result.payment_url;
       } else {
-        alert("Payment creation failed: " + result.error);
+        throw new Error(result.message || "Payment initiation failed");
       }
     } catch (error) {
-      console.error("Booking error:", error);
-      alert("Something went wrong. Please try again.");
+      console.error("Booking submission error:", error);
+      alert("Failed to process booking. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
   };
-
-  // Check-in available range
-  // const checkinAvailability = [
-  //   { start: new Date("2025-12-03"), end: new Date("2025-12-04") },
-  // ];
-
-  // Checkout availability ranges relative to check-in
-  // const checkoutAvailability = [
-  //   { start: new Date("2025-12-04"), end: new Date("2025-12-06") }, // for earliest check-in
-  // ];
 
   const generateDates = (start: Date, end: Date): Date[] => {
     const dates = [];
@@ -178,12 +210,6 @@ export default function BookingPage() {
     const end = new Date(hotel.checkout_end_date);
     return generateDates(start, end);
   };
-
-
-  // const isCheckoutDisabled = (date: Date) => {
-  //   if (!checkinDate) return false;
-  //   return date <= checkinDate;
-  // };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
@@ -264,12 +290,19 @@ export default function BookingPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="title">Title *</Label>
-                  <Input
-                    id="title"
-                    {...register("title")}
-                    className={errors.title ? "border-red-500" : ""}
-                    placeholder="Eg. Mr/Ms/Mrs"
-                  />
+                  <Select onValueChange={(value) => setValue("title", value)}>
+                    <SelectTrigger
+                      className={errors.title ? "border-red-500" : ""}
+                    >
+                      <SelectValue placeholder="Select title" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Mr">Mr</SelectItem>
+                      <SelectItem value="Ms">Ms</SelectItem>
+                      <SelectItem value="Mrs">Mrs</SelectItem>
+                      <SelectItem value="Dr">Dr</SelectItem>
+                    </SelectContent>
+                  </Select>
                   {errors.title && (
                     <p className="text-red-500 text-sm">
                       {errors.title.message}
@@ -325,9 +358,9 @@ export default function BookingPage() {
                       <SelectValue placeholder="Select gender" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="male">Male</SelectItem>
-                      <SelectItem value="female">Female</SelectItem>
-                      <SelectItem value="other">Other</SelectItem>
+                      <SelectItem value="Male">Male</SelectItem>
+                      <SelectItem value="Female">Female</SelectItem>
+                      <SelectItem value="Other">Other</SelectItem>
                     </SelectContent>
                   </Select>
                   {errors.gender && (
@@ -532,9 +565,9 @@ export default function BookingPage() {
                           <div className="flex justify-between items-center">
                             <div>
                               <div className="font-medium">{room.name}</div>
-                              <div className="text-sm text-gray-500">
+                              {/* <div className="text-sm text-gray-500">
                                 {room.description}
-                              </div>
+                              </div> */}
                             </div>
                             <div className="text-right">
                               <div className="font-bold text-lg">
@@ -603,12 +636,22 @@ export default function BookingPage() {
                   <div>
                     <h3 className="text-xl font-semibold">Total Amount</h3>
                     <p className="opacity-90">
-                      {checkinDate && checkoutDate
-                        ? `${Math.ceil(
+                      {checkinDate && checkoutDate ? (
+                        <>
+                          {`${Math.ceil(
                             (checkoutDate.getTime() - checkinDate.getTime()) /
                               (1000 * 60 * 60 * 24)
-                          )} night(s) × ₹${roomTypes[roomType].price}`
-                        : "Select dates for calculation"}
+                          )} night(s) × ₹${
+                            hotel?.room_types?.find((r) =>
+                              roomType === "single"
+                                ? r.name.toLowerCase().includes("single")
+                                : r.name.toLowerCase().includes("double")
+                            )?.price || 0
+                          }`}
+                        </>
+                      ) : (
+                        "Select dates for calculation"
+                      )}
                     </p>
                   </div>
                   <div className="text-right">
