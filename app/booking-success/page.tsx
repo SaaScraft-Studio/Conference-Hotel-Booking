@@ -157,7 +157,7 @@ export default function BookingSuccessPage() {
               </div>
 
               {/* Email Confirmation */}
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              {/* <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                 <div className="flex items-center space-x-3">
                   <Mail className="h-5 w-5 text-blue-600" />
                   <div>
@@ -170,10 +170,10 @@ export default function BookingSuccessPage() {
                     </p>
                   </div>
                 </div>
-              </div>
+              </div> */}
 
               {/* Next Steps */}
-              <div className="border-t pt-6">
+              {/* <div className="border-t pt-6">
                 <h3 className="text-lg font-semibold mb-3">What's Next?</h3>
                 <ul className="space-y-2 text-sm text-gray-600">
                   <li className="flex items-start space-x-2">
@@ -191,7 +191,7 @@ export default function BookingSuccessPage() {
                     <span>For any queries, contact our customer support</span>
                   </li>
                 </ul>
-              </div>
+              </div> */}
 
               {/* Actions */}
               <div className="flex flex-col sm:flex-row gap-4 pt-4">

@@ -77,6 +77,13 @@ export default function BookingPage() {
   const hotelId = searchParams.get("hotel");
   console.log("Hotel ID from URL:", hotelId);
 
+  const formatDateYYYYMMDD = (date: Date): string => {
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = date.getFullYear();
+    return `${year}-${month}-${day}`;
+  };
+
   useEffect(() => {
     if (!hotelId) return;
 
@@ -139,6 +146,7 @@ export default function BookingPage() {
       if (!selectedRoom) {
         throw new Error("Invalid room type selection");
       }
+
       const bookingData = {
         hotel: hotelId,
         title: data.title,
@@ -152,12 +160,13 @@ export default function BookingPage() {
         company_name: data.companyName,
         gst_number: data.gst || "",
         address: data.address,
-        check_in_date: new Date(data.checkinDate).toISOString(),
-        check_out_date: new Date(data.checkoutDate).toISOString(),
+        check_in_date: checkinDate ? formatDateYYYYMMDD(checkinDate) : "",
+        check_out_date: checkoutDate ? formatDateYYYYMMDD(checkoutDate) : "",
         room_type: selectedRoom.name,
         total_amount: totalAmount,
       };
 
+      console.log("Submitting booking data:", bookingData);
       // Call the payment initiation endpoint
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/payment/initiate`,
