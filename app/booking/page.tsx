@@ -65,7 +65,9 @@ const bookingSchema = z.object({
 
 export default function BookingPage() {
   const [checkinDate, setCheckinDate] = useState<Date>();
+  console.log("Check-in Date:", checkinDate);
   const [checkoutDate, setCheckoutDate] = useState<Date>();
+  console.log("Check-out Date:", checkoutDate);
   const [roomType, setRoomType] = useState<"single" | "double">("single");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [hotel, setHotel] = useState<Hotel | null>(null);
@@ -169,6 +171,7 @@ export default function BookingPage() {
       );
 
       const result = await response.json();
+      console.log("Payment initiation result:", result);
 
       if (response.ok) {
         // Redirect to Instamojo payment page
@@ -264,12 +267,13 @@ export default function BookingPage() {
           <Card className="overflow-hidden shadow-2xl">
             <div className="h-64 relative">
               <iframe
-                src={`https://www.google.com/maps?q=${encodeURIComponent(
-                  hotel?.map_link || ""
-                )}&output=embed`}
-                className="w-full h-full"
+                src={`https://maps.google.com/maps?q=${encodeURIComponent(
+                  `${hotel?.hotel_name}, ${hotel?.address}` || "Hotel Location"
+                )}&z=15&output=embed`}
+                className="w-full h-full border-0"
                 loading="lazy"
                 title="Hotel Map"
+                allowFullScreen
               ></iframe>
             </div>
           </Card>
