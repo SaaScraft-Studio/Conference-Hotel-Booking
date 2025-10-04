@@ -65,17 +65,13 @@ const bookingSchema = z.object({
 
 export default function BookingPage() {
   const [checkinDate, setCheckinDate] = useState<Date>();
-  console.log("Check-in Date:", checkinDate);
   const [checkoutDate, setCheckoutDate] = useState<Date>();
-  console.log("Check-out Date:", checkoutDate);
   const [roomType, setRoomType] = useState<"single" | "double">("single");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [hotel, setHotel] = useState<Hotel | null>(null);
-  console.log("Selected hotel:", hotel);
 
   const searchParams = useSearchParams();
   const hotelId = searchParams.get("hotel");
-  console.log("Hotel ID from URL:", hotelId);
 
   const formatDateYYYYMMDD = (date: Date): string => {
     const day = String(date.getDate()).padStart(2, "0");
@@ -166,7 +162,6 @@ export default function BookingPage() {
         total_amount: totalAmount,
       };
 
-      console.log("Submitting booking data:", bookingData);
       // Call the payment initiation endpoint
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/payment/initiate`,
@@ -180,7 +175,6 @@ export default function BookingPage() {
       );
 
       const result = await response.json();
-      console.log("Payment initiation result:", result);
 
       if (response.ok) {
         // Redirect to Instamojo payment page

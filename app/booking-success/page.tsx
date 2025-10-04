@@ -20,7 +20,6 @@ export default function BookingSuccessPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const bookingId = searchParams.get("id");
-  console.log("Booking ID from URL:", bookingId);
   useEffect(() => {
     if (bookingId) {
       fetchBookingDetails(bookingId);

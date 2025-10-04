@@ -9,17 +9,16 @@ export default function BookingFailurePage() {
   const searchParams = useSearchParams(); // Ensure the component re-renders on URL change
   const router = useRouter();
   const bookingId = searchParams.get("id");
-  console.log("Booking ID from URL:", bookingId);
 
-  const handleRetry = () => {
-    if (bookingId) {
-      // Retry payment for the same booking
-      router.push(`/retry?bookingId=${bookingId}`);
-    } else {
-      // Go back to booking page
-      router.back();
-    }
-  };
+  // const handleRetry = () => {
+  //   if (bookingId) {
+  //     // Retry payment for the same booking
+  //     router.push(`/retry?bookingId=${bookingId}`);
+  //   } else {
+  //     // Go back to booking page
+  //     router.back();
+  //   }
+  // };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-red-50 via-pink-50 to-rose-50 flex items-center justify-center">
@@ -37,13 +36,13 @@ export default function BookingFailurePage() {
           </p>
 
           <div className="space-y-3">
-            <Button
+            {/* <Button
               onClick={handleRetry}
               className="w-full bg-gradient-to-r from-blue-600 to-purple-700"
             >
               <RotateCcw className="mr-2 h-4 w-4" />
               Try Again
-            </Button>
+            </Button> */}
 
             <Button
               onClick={() => router.push("/")}
@@ -55,13 +54,13 @@ export default function BookingFailurePage() {
             </Button>
           </div>
 
-          {bookingId && (
+          {/* {bookingId && (
             <div className="mt-4 p-3 bg-gray-50 rounded-lg">
               <p className="text-sm text-gray-600">
                 Reference ID: <span className="font-mono">{bookingId}</span>
               </p>
             </div>
-          )}
+          )} */}
         </CardContent>
       </Card>
     </div>
