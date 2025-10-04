@@ -6,12 +6,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
   CircleCheck as CheckCircle,
-  Mail,
-  Phone,
-  MapPin,
   Calendar,
   Chrome as Home,
   Download,
+  MapPinHouse,
 } from "lucide-react";
 
 export default function BookingSuccessPage() {
@@ -117,6 +115,17 @@ export default function BookingSuccessPage() {
                   Stay Details
                 </h3>
                 <div className="space-y-3">
+                  {/* Hotel Name */}
+                  <div className="flex items-center space-x-3">
+                    <MapPinHouse className="h-5 w-5 text-blue-600" />
+                    <div>
+                      <p className="font-medium">Hotel</p>
+                      <p className="text-sm text-gray-600">
+                        {bookingDetails?.hotel_name || "N/A"}
+                      </p>
+                    </div>
+                  </div>
+
                   <div className="flex items-center space-x-3">
                     <Calendar className="h-5 w-5 text-blue-600" />
                     <div>

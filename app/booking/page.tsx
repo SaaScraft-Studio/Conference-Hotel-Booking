@@ -18,18 +18,9 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { DatePicker } from "@/components/ui/date-picker";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import {
-  MapPin,
-  Calendar,
-  Users,
-  Shield,
-  CreditCard,
-  Star,
-  Home,
-} from "lucide-react";
+import { MapPin, Calendar, CreditCard, Star, Home } from "lucide-react";
 import Link from "next/link";
 import { indianStates } from "@/lib/indian-states";
-import { roomTypes, calculateBookingAmount } from "@/lib/room-pricing";
 import { BookingFormData } from "@/types/booking";
 import { useSearchParams } from "next/navigation";
 // import { hotels } from "@/data/hotels"; // make sure this is imported
@@ -71,9 +62,18 @@ export default function BookingPage() {
   const [roomType, setRoomType] = useState<"single" | "double">("single");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [hotel, setHotel] = useState<Hotel | null>(null);
+  const [isScrolled, setIsScrolled] = useState(false);
 
   const searchParams = useSearchParams();
   const hotelId = searchParams.get("hotel");
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 100);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const formatDateYYYYMMDD = (date: Date): string => {
     const day = String(date.getDate()).padStart(2, "0");
@@ -233,12 +233,15 @@ export default function BookingPage() {
           }}
         ></div>
 
-        {/* Home Icon */}
-        <div className="absolute top-6 left-6 z-50">
-          <Link
-            href="/"
-            className="flex items-center justify-center w-12 h-12 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full transition-all duration-300 hover:scale-110 shadow-lg"
-          >
+        {/* Floating Home Icon */}
+        <div
+          className={`fixed top-6 left-6 z-50 transition-all duration-300 ${
+            isScrolled
+              ? "bg-gradient-to-r from-blue-600 to-purple-600 backdrop-blur-md shadow-xl rounded-full p-3 hover:from-blue-700 hover:to-purple-700 hover:scale-110 border-2 border-white/30"
+              : "bg-white/20 backdrop-blur-sm rounded-full p-2 hover:bg-white/30"
+          }`}
+        >
+          <Link href="/" className="flex items-center justify-center">
             <Home className="h-6 w-6 text-white" />
           </Link>
         </div>
