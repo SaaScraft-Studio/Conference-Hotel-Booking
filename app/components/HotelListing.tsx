@@ -63,9 +63,9 @@ export default function HotelListing() {
 
   if (loading) {
     return (
-      <p className="text-center py-20 text-gray-600 text-lg">
-        Loading hotels...
-      </p>
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
     );
   }
 

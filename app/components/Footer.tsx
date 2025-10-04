@@ -11,7 +11,14 @@ export default function Footer() {
         </p>
         <div className="mt-4 flex justify-center space-x-6 text-sm">
           <span className="text-orange-400">
-            Powered by SaaScraft Studio (India) Pvt. Ltd.
+            <a
+              href="https://saascraft.studio"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-orange-400 hover:underline"
+            >
+              Powered by SaaScraft Studio (India) Pvt. Ltd.
+            </a>
           </span>
         </div>
       </div>
