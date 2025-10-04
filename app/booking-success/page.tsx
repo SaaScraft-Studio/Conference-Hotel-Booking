@@ -119,7 +119,7 @@ export default function BookingSuccessPage() {
                   <div className="flex items-center space-x-3">
                     <MapPinHouse className="h-5 w-5 text-blue-600" />
                     <div>
-                      <p className="font-medium">Hotel</p>
+                      <p className="font-medium">Hotel Name</p>
                       <p className="text-sm text-gray-600">
                         {bookingDetails?.hotel_name || "N/A"}
                       </p>
