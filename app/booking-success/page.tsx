@@ -31,7 +31,7 @@ export default function BookingSuccessPage() {
   const fetchBookingDetails = async (id: string) => {
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/booking/${id}`
+        `${process.env.NEXT_PUBLIC_API_URL}/api/booking/${id}`
       );
       if (response.ok) {
         const booking = await response.json();

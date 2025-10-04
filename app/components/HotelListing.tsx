@@ -18,7 +18,6 @@ import { Hotel } from "@/types/hotel";
 export default function HotelListing() {
   const router = useRouter();
   const [hotels, setHotels] = useState<Hotel[]>([]);
-  console.log("Current hotels state:", hotels);
   const [loading, setLoading] = useState(true);
   const [starFilter, setStarFilter] = useState("all");
   const [distanceFilter, setDistanceFilter] = useState("all");
@@ -26,7 +25,7 @@ export default function HotelListing() {
   useEffect(() => {
     async function fetchHotels() {
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/hotel`);
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/hotel`);
         const data = await res.json();
         console.log("Fetched hotels:", data);
         setHotels(data);

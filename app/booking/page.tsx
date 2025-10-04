@@ -86,7 +86,7 @@ export default function BookingPage() {
     if (!hotelId) return;
 
     // Fetch hotel dynamically from your API or local data
-    fetch(`${process.env.NEXT_PUBLIC_API_URL}/hotel/${hotelId}`)
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/hotel/${hotelId}`)
       .then((res) => res.json())
       .then((data: Hotel) => setHotel(data))
       .catch((err) => console.error("Failed to fetch hotel:", err));
@@ -166,7 +166,7 @@ export default function BookingPage() {
 
       // Call the payment initiation endpoint
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/payment/initiate`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/payment/initiate`,
         {
           method: "POST",
           headers: {
