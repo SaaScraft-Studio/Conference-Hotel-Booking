@@ -25,7 +25,9 @@ import {
   Shield,
   CreditCard,
   Star,
+  Home,
 } from "lucide-react";
+import Link from "next/link";
 import { indianStates } from "@/lib/indian-states";
 import { roomTypes, calculateBookingAmount } from "@/lib/room-pricing";
 import { BookingFormData } from "@/types/booking";
@@ -222,7 +224,24 @@ export default function BookingPage() {
       {/* Hero Banner */}
       <div className="relative h-96 bg-gradient-to-r from-blue-600 to-purple-700 overflow-hidden">
         <div className="absolute inset-0 bg-black/20"></div>
-        <div className="absolute inset-0 bg-[url('https://images.pexels.com/photos/258154/pexels-photo-258154.jpeg')] bg-cover bg-center mix-blend-overlay opacity-30"></div>
+        <div
+          className="absolute inset-0 bg-cover bg-center mix-blend-overlay opacity-30"
+          style={{
+            backgroundImage: hotel?.main_image_url
+              ? `url(${hotel.main_image_url})`
+              : `url('https://images.pexels.com/photos/258154/pexels-photo-258154.jpeg')`,
+          }}
+        ></div>
+
+        {/* Home Icon */}
+        <div className="absolute top-6 left-6 z-50">
+          <Link
+            href="/"
+            className="flex items-center justify-center w-12 h-12 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full transition-all duration-300 hover:scale-110 shadow-lg"
+          >
+            <Home className="h-6 w-6 text-white" />
+          </Link>
+        </div>
 
         <div className="relative z-10 container mx-auto px-4 h-full flex items-center">
           <div className="text-white max-w-2xl">
