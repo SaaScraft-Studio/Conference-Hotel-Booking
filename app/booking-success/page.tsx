@@ -15,6 +15,7 @@ import {
 export default function BookingSuccessPage() {
   const [bookingDetails, setBookingDetails] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [hotelName, setHotelName] = useState<string>("N/A");
   const searchParams = useSearchParams();
   const router = useRouter();
   const bookingId = searchParams.get("id");
@@ -41,6 +42,26 @@ export default function BookingSuccessPage() {
       setIsLoading(false);
     }
   };
+
+  // After bookingDetails are loaded, fetch hotel name
+  useEffect(() => {
+    const fetchHotelName = async () => {
+      if (bookingDetails?.hotel) {
+        try {
+          const res = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/api/hotel/${bookingDetails.hotel}`
+          );
+          if (res.ok) {
+            const hotel = await res.json();
+            setHotelName(hotel.hotel_name || "N/A");
+          }
+        } catch (err) {
+          setHotelName("N/A");
+        }
+      }
+    };
+    fetchHotelName();
+  }, [bookingDetails]);
 
   if (isLoading) {
     return (
@@ -120,9 +141,7 @@ export default function BookingSuccessPage() {
                     <MapPinHouse className="h-5 w-5 text-blue-600" />
                     <div>
                       <p className="font-medium">Hotel Name</p>
-                      <p className="text-sm text-gray-600">
-                        {bookingDetails?.hotel_name || "N/A"}
-                      </p>
+                      <p className="text-sm text-gray-600">{hotelName}</p>
                     </div>
                   </div>
 
