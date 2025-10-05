@@ -163,7 +163,7 @@ export default function BookingPage() {
         room_type: selectedRoom.name,
         total_amount: totalAmount,
       };
-
+      console.log("Booking data.......", bookingData);
       // Call the payment initiation endpoint
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/payment/initiate`,
