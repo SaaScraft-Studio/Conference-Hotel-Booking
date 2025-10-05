@@ -121,7 +121,7 @@ export default function BookingSuccessPage() {
                     <div>
                       <p className="font-medium">Hotel Name</p>
                       <p className="text-sm text-gray-600">
-                        {bookingDetails?.hotel_name || "N/A"}
+                        {bookingDetails?.hotel?.hotel_name || "N/A"}
                       </p>
                     </div>
                   </div>
